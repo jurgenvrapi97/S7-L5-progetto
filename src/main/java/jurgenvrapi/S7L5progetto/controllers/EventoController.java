@@ -133,5 +133,37 @@ public class EventoController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteEvento(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "").trim();
+            jwtTools.verifyToken(token);
+
+            Utente utente = utenteService.getUtenteFromToken(token);
+
+            Optional<Evento> optionalEvento = eventoService.findEventoById(id);
+
+            if (optionalEvento.isPresent()) {
+                Evento existingEvento = optionalEvento.get();
+
+                if (!existingEvento.getUtenteCreatore().getId().equals(utente.getId())) {
+                    return new ResponseEntity<>("Non hai i permessi per eliminare questo evento!", HttpStatus.FORBIDDEN);
+                }
+
+                eventoService.deleteEvento(id);
+
+                return new ResponseEntity<>("Evento eliminato con successo", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Evento non trovato", HttpStatus.NOT_FOUND);
+            }
+        } catch (UnauthorizedException ex) {
+            return new ResponseEntity<>("Problemi col token! Per favore effettua di nuovo il login!", HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Si è verificato un errore durante l'eliminazione dell'evento", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
 }
