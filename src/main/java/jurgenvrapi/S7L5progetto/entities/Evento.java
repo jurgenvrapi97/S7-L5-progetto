@@ -12,6 +12,9 @@ public class Evento {
     private Long id;
 
     private String nomeEvento;
+    private String descrizione;
+    private String luogo;
+    private int posti;
     private Date dataEvento;
 
     @ManyToOne

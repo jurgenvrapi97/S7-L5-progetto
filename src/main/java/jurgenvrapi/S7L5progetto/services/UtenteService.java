@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import jurgenvrapi.S7L5progetto.entities.Utente;
 import jurgenvrapi.S7L5progetto.repositories.UtenteRepository;
 
+import java.util.Optional;
+
 @Service
 public class UtenteService {
 
@@ -28,5 +30,8 @@ public class UtenteService {
         return utenteRepository.save(utente);
     }
 
+    public Optional<Utente> findUtenteByEmail(String email) {
+        return utenteRepository.findByEmail(email);
+    }
 }
 
