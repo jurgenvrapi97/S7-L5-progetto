@@ -5,6 +5,7 @@ import jurgenvrapi.S7L5progetto.repositories.EventoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,5 +28,9 @@ public class EventoService {
 
     public void deleteEvento(Long id) {
         eventoRepository.deleteById(id);
+    }
+
+    public List<Evento> getAllEventi() {
+        return eventoRepository.findAll();
     }
 }

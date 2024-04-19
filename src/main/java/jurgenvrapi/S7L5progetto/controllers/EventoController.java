@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/eventi")
 public class EventoController {
@@ -50,6 +52,17 @@ public class EventoController {
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(new EventoPayload("Si è verificato un errore durante la creazione dell'evento", null), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Evento>> getAllEventi() {
+        try {
+            List<Evento> eventi = eventoService.getAllEventi();
+            return new ResponseEntity<>(eventi, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
