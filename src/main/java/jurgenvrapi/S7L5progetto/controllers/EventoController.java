@@ -103,4 +103,35 @@ public class EventoController {
         }
     }
 
+    @PostMapping("/book/{id}")
+    public ResponseEntity<String> bookSeats(@PathVariable Long id, @RequestBody int seats, @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "").trim();
+            jwtTools.verifyToken(token);
+
+            Optional<Evento> optionalEvento = eventoService.findEventoById(id);
+
+            if (optionalEvento.isPresent()) {
+                Evento evento = optionalEvento.get();
+
+                if (evento.getPosti() < seats) {
+                    return new ResponseEntity<>("Non ci sono abbastanza posti disponibili", HttpStatus.BAD_REQUEST);
+                }
+
+                evento.setPosti(evento.getPosti() - seats);
+                eventoService.saveEvento(evento);
+
+                return new ResponseEntity<>("Posti prenotati con successo", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Evento non trovato", HttpStatus.NOT_FOUND);
+            }
+        } catch (UnauthorizedException ex) {
+            return new ResponseEntity<>("Problemi col token! Per favore effettua di nuovo il login!", HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Si è verificato un errore durante la prenotazione dei posti", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 }
