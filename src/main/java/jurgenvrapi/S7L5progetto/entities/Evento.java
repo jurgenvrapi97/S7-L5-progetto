@@ -20,4 +20,6 @@ public class Evento {
     @ManyToOne
     @JoinColumn(name = "utente_id", nullable = false)
     private Utente utenteCreatore;
+
+
 }
