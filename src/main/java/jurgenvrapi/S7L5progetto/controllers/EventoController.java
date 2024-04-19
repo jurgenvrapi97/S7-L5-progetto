@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/eventi")
@@ -63,6 +64,42 @@ public class EventoController {
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EventoPayload> updateEvento(@PathVariable Long id, @RequestBody Evento updatedEvento, @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "").trim();
+            jwtTools.verifyToken(token);
+
+            Utente utente = utenteService.getUtenteFromToken(token);
+
+            Optional<Evento> optionalEvento = eventoService.findEventoById(id);
+
+            if (optionalEvento.isPresent()) {
+                Evento existingEvento = optionalEvento.get();
+
+                if (!existingEvento.getUtenteCreatore().getId().equals(utente.getId())) {
+                    return new ResponseEntity<>(new EventoPayload("Non hai i permessi per modificare questo evento!", null), HttpStatus.FORBIDDEN);
+                }
+
+                existingEvento.setNomeEvento(updatedEvento.getNomeEvento());
+                existingEvento.setDescrizione(updatedEvento.getDescrizione());
+                existingEvento.setLuogo(updatedEvento.getLuogo());
+                existingEvento.setPosti(updatedEvento.getPosti());
+                existingEvento.setDataEvento(updatedEvento.getDataEvento());
+
+                Evento savedEvento = eventoService.saveEvento(existingEvento);
+                return new ResponseEntity<>(new EventoPayload("Evento modificato con successo", savedEvento), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(new EventoPayload("Evento non trovato", null), HttpStatus.NOT_FOUND);
+            }
+        } catch (UnauthorizedException ex) {
+            return new ResponseEntity<>(new EventoPayload("Problemi col token! Per favore effettua di nuovo il login!", null), HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(new EventoPayload("Si è verificato un errore durante la modifica dell'evento", null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
